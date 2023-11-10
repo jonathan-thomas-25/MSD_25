@@ -30,7 +30,7 @@ if(fh) $display("The trace file %s is successfully opened",filename);
 else $display("[ERROR] - Failed to open the trace file");
 
 
-for(int i=0;i<5;i++)begin
+while(!$feof(fh))begin
 $fgets(line,fh);
 //line.split(" ",parts);
 
@@ -54,7 +54,7 @@ $display("address=%s",address);
 
 
 end	
-
+$fclose(fh);
 
 ////////////////////////////////////////////////////////////
 

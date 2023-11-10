@@ -14,7 +14,7 @@ input_file=argv[1];
 file=fopen(input_file,"r");
 
 if(file==NULL){
-perror("[ERROR] The Trace file is empty");
+perror("[ERROR] The Trace file is empty")    ; //tell me why
 return(1);
 }
 

@@ -66,7 +66,7 @@ end_sim_task;
    if ($value$plusargs("INPUT_FILE=%s", filename)) begin
       $display("The filename is %s", filename);
    end
-   else filename = "tracecp2.txt";
+   else filename = "trace.txt";
 
    if ($value$plusargs("OUTPUT_FILE=%s", filename1)) begin
         $display("The filename is %s", filename1);
@@ -108,10 +108,10 @@ end_sim_task;
  
       if(cpu_clock_count>=clock_cycle_int)begin
 	if (request_type == "0" || request_type == "2") begin
-           transaction_in=$sformatf("PRE %0h %0h \nACT0 %0h %0h %0h\nRD0 %0h\n",trans_data.bg,trans_data.ba,trans_data.bg,trans_data.ba,trans_data.row,trans_data.col);
+	   transaction_in=$sformatf("ACT0 %0h %0h %0h\nACT1 %0h %0h %0h\nRD0 %0h\nPRE %0h %0h \n",trans_data.bg,trans_data.ba,trans_data.row,trans_data.bg,trans_data.ba,trans_data.row,trans_data.col,trans_data.bg,trans_data.ba);
 	end
         if (request_type == "1") begin
-	   transaction_in=$sformatf("PRE %0h %0h \nACT0 %0h %0h %0h\nWR0 %0h\n",trans_data.bg,trans_data.ba,trans_data.bg,trans_data.ba,trans_data.row,trans_data.col);
+	   transaction_in=$sformatf("ACT0 %0h %0h %0h\nACT1 %0h %0h %0h\nWR0 %0h\nPRE %0h %0h \n",trans_data.bg,trans_data.ba,trans_data.row,trans_data.bg,trans_data.ba,trans_data.row,trans_data.col,trans_data.bg,trans_data.ba);
 	end
 	if(main_q.size()<15)begin	
            main_q.push_back(transaction_in);
@@ -147,13 +147,13 @@ end_sim_task;
 	else begin
 	   
 	   if (request_type == "0" || request_type == "2") begin
-		$fwrite(fh1,"CPU Time Elapsed -------%0d\n",out_time);
-                $fwrite(fh1,"%s\n" ,out_time,transaction_out);
+		$display("CPU Time Elapsed -------%0d\n",out_time);
+                $display("%0d %s\n" ,out_time,transaction_out);
             end
 
             if (request_type == "1") begin
-		$fwrite(fh1,"CPU Time Elapsed -------%0d\n",out_time);
-                $fwrite(fh1,"%s\n",out_time,transaction_out);
+		$display("CPU Time Elapsed -------%0d\n",out_time);
+                $display("%0d %s\n",out_time,transaction_out);
        	    end
 	end
 

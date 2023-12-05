@@ -36,6 +36,13 @@ def generate_trace_file(time, operation, bankgroup, bank, row):
         trace_file.write(trace_data)
 
 z = int(input("Enter number of entries: "))
+y = int(input("To clear previous traces, enter 1: "))
+
+    # To clear inputs
+if(y==1):
+    with open('trace_file.txt', 'w'):
+        pass
+
 
 for _ in range(z):
     time_input = int(input("Enter time: "))

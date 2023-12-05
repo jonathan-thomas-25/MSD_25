@@ -1,0 +1,33 @@
+import random
+def generate_trace_file( time, operation, bankgroup, bank, row):
+    # Convert decimal numbers to hexadecimal
+    time_con = int(time)
+    bankgroup_bin = bin(bankgroup)
+    bank_bin = bin(bank)
+    row_bin = bin(row)
+    column_bin1 = random.randint(0x1111,0x0000)
+    column_bin2 = random.randint(0x111111,0x000000)
+    channel = 0
+    Byteselect = random.randint(0x11,0x00)
+    address = [34]
+    address[1:0] = Byteselect
+    address[5:2] = column_bin1
+    address[9:7] = bankgroup_bin
+    address[11:10] = bank_bin
+    address[17:12] = column_bin2
+    address[33:18] = row_bin
+    core = random.randint(11,0)
+    operation_con = int(operation)
+    # Format the data for the trace file
+    trace_data = f"{time_con} {core} {operation_con} {address[33:0]}\n"
+
+    # Write the formatted data to the trace file
+    with open('trace_file.txt', 'w') as trace_file:
+        trace_file.write(trace_data)
+
+# Example usage:
+time_input = int(input("Enter time: "))
+op_input = int(input("Enter Operation: "))
+bankgroup_input = int(input("Enter bank group: "))
+bank_input = int(input("Enter bank: "))
+row_input = int(input("Enter row: "))

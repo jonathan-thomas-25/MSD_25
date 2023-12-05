@@ -107,7 +107,6 @@ initial begin
    first_transaction=1'b1;
    set_ba_bg=0;
    first_request=0;
-   //end_sim_task;
    enable=1'b1;
    cpu_clock=1'b0;
    sim_end=1'b0;
@@ -166,16 +165,14 @@ initial begin
 		if(main_q.size()>0)begin
 		  end_data=main_q[0];
 		  bank_number=4*(end_data.bg)+(end_data.ba);
-		  //$display("The bank number from end data is %d",bank_number);
 		  out_time=dimm_clock_count*2;
 
 		  case(next_state)
 			INITIAL: begin	
 					bk_status=bsr("initial",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type);
-					if(bk_status==2)//close page
+					if(bk_status==2)//close page EMPTY
 					begin
 						next_state=ACT0;
-						void'(bsr("activate",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 
 					end
 					else if (bk_status==3)//page hit
@@ -183,20 +180,17 @@ initial begin
 						if(end_data.request_type==0 |end_data.request_type==2)
 						begin
 							next_state=READ0;
- 							void'(bsr("read",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 
 						end
 						else if(end_data.request_type==1)
 						begin
 							next_state=WRITE0;
-							void'(bsr("write",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 
 						end
 					end
 					else if (bk_status==4)//page miss
 					begin
 							next_state=PRE;
-							void'(bsr("precharge",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));	
 					end
 				end
 			PRE:begin
@@ -204,17 +198,18 @@ initial begin
 					if(time_elapsed)
 					begin
 						$fwrite(fh1,"%0d   PRE %d %d\n",out_time,end_data.bg,end_data.ba);
+						if(debug_check==1'b1)begin
+							$display("%0d   PRE %d %d\n",out_time,end_data.bg,end_data.ba);
+						end
 						next_state=ACT0;
-						void'(bsr("activate",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 					end 
 			    end
 						
 			ACT0:begin
-					//	time_elapsed=bsr("activate",bank_number,end_data.row,end_data.ba,end_data.bg);//MISTAKE here if condition required.					 
 						time_elapsed=bsr("activate",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type);
 						if(time_elapsed)begin        	
-							$fwrite(fh1,"%0d   ACT0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.row);
-							$fwrite(fh1,"%0d   ACT1 %d %d %h\n",out_time+2,end_data.bg,end_data.ba,end_data.row);//check clockcycles while writing
+							$fwrite(fh1,"%0d   ACT0 %d %d %h\n",out_time-2,end_data.bg,end_data.ba,end_data.row);
+							$fwrite(fh1,"%0d   ACT1 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.row);
 							next_state=ACT1;
 						end
 			
@@ -224,12 +219,10 @@ initial begin
 						if(end_data.request_type==0 || end_data.request_type==2)
 						begin
 						next_state=READ0;
-						void'(bsr("read",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 						end
 						else if(end_data.request_type==1)
 						begin
 						next_state=WRITE0;
-						void'(bsr("write",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 						end
 		        	end	
 
@@ -237,37 +230,40 @@ initial begin
 			READ0:begin
 						time_elapsed=bsr("read",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type);
 						if(time_elapsed)begin					
-							$fwrite(fh1,"%0d    READ0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.col);//check clockcycles while writing
+							$fwrite(fh1,"%0d    READ0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.col);
 							$fwrite(fh1,"%0d    READ1 %d %d %h\n",out_time+2,end_data.bg,end_data.ba,end_data.col);
+							if(debug_check==1'b1)begin
+								$display("%0d    READ0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.col);
+								$display("%0d    READ1 %d %d %h\n",out_time+2,end_data.bg,end_data.ba,end_data.col);
+							end
 							next_state=READ1;
 						end
 				end			
 			READ1:begin
 						next_state=DONE;
-						void'(bsr("done",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));//done state
 				end
 			
 							
 			WRITE0:begin		
 						time_elapsed=bsr("write",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type);
 						if(time_elapsed)begin
-							$fwrite(fh1,"%0d    WRITE0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.col);//check clockcycles while writing
-							$fwrite(fh1,"%0d    WRITE1 %d %d %h\n",out_time+2,end_data.bg,end_data.ba,end_data.col);
+							$fwrite(fh1,"%0d    WRITE0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.col); 							                 $fwrite(fh1,"%0d    WRITE1 %d %d %h\n",out_time+2,end_data.bg,end_data.ba,end_data.col);
+							if(debug_check==1'b1)begin
+								$display("%0d    WRITE0 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.col);
+								$display("%0d    WRITE1 %d %d %h\n",out_time+2,end_data.bg,end_data.ba,end_data.col);
+							end
+					
 							next_state=WRITE1;
 						end
 				end
 			WRITE1:begin
 						next_state=DONE;
-					//	send_state="Done";
-					//	void'(bsr("done",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 
 				end
 			DONE:begin
 					time_elapsed=bsr("done",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type);
 					if(time_elapsed)
 					begin
-						$display("timing satisfied for going to in_state");
-					void'(bsr("initial",bank_number,end_data.row,end_data.ba,end_data.bg,end_data.request_type));
 						next_state=INITIAL;
 						main_q.pop_front();
 						pop_counter=pop_counter+1;
@@ -312,7 +308,6 @@ int bg_rd;
 int ba_rd;
 int bg_wr;
 int ba_wr;
-//int rd_wr;//added variable for done state
 
 int min_activate;
 int min_activate_location;
@@ -364,7 +359,6 @@ foreach(bsr_array[i])begin
 end
 
 /////////////////////////////////////////////////
-//if(first_precharge=1'b1)begin
 foreach(bsr_array[i])begin
    if(bsr_array[i][PRECHARGE]<bsr_array[min_precharge_location][PRECHARGE])begin
 	min_precharge=bsr_array[i][PRECHARGE];
@@ -373,9 +367,7 @@ foreach(bsr_array[i])begin
 end
 bg_p=min_precharge_location/4;
 ba_p=min_precharge_location%4;
-//end
 /////////////////////////////////////////////////
-//if(first_activate=1'b1)begin
 foreach(bsr_array[i])begin
    if(bsr_array[i][ACTIVATE]<bsr_array[min_activate_location][ACTIVATE])begin
 	min_activate=bsr_array[i][ACTIVATE];
@@ -384,10 +376,7 @@ foreach(bsr_array[i])begin
 end
 bg_a=min_activate_location/4;
 ba_a=min_activate_location%4;
-//$display("[dhruva]The value of bg_a is %d and that of ba_a is %d",bg_a,ba_a);
-//end
 /////////////////////////////////////////////////
-//if(first_read=1'b1)begin
 foreach(bsr_array[i])begin
    if(bsr_array[i][READ]<bsr_array[min_read_location][READ])begin
 	min_read=bsr_array[i][READ];
@@ -396,10 +385,7 @@ foreach(bsr_array[i])begin
 end
 bg_rd=min_read_location/4;
 ba_rd=min_read_location%4;
-//$display("[dhruva]The value of bg_rd is %d and that of ba_rd is %d",bg_rd,ba_rd);
-//end
 /////////////////////////////////////////////////
-//if(first_write=1'b1)begin
 foreach(bsr_array[i])begin
    if(bsr_array[i][WRITE]<bsr_array[min_write_location][WRITE])begin
 	min_write=bsr_array[i][WRITE];
@@ -409,7 +395,6 @@ end
 
 bg_wr=min_write_location/4;
 ba_wr=min_write_location%4;
-//end
 /////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -438,7 +423,6 @@ if(next_state=="initial")begin
 end//initial state
 
 if(next_state=="activate")begin
-	//if(first_activate=1'b1)begin
 	bsr_array[bank_number][BANK_STATUS]=1'b1;	
 	if(bg==bg_a&&ba==ba_a)begin
 		delay1=tRC;
@@ -454,11 +438,8 @@ if(next_state=="activate")begin
 		delay2=tRP;
 	end
 	else delay2=0;
-	//	$display("[dhruva][delay1=%d delay2=%d] bsr_array[previous_activate] is %d", delay1,delay2,bsr_array[(4*bg_a)+ba_a][ACTIVATE]);
 		if(bsr_array[(4*bg_a)+ba_a][ACTIVATE]>delay1 && bsr_array[(4*bg_p)+ba_p][PRECHARGE]>delay2)begin 
-		//	$display("[dhruva] - Activate Issued\n\n");
 			 bsr_array[bank_number][ACTIVATE]=0;
-			 //$display("JON2");
 			 
 			 return 1;
 		end
@@ -506,12 +487,9 @@ if(next_state=="read")begin
 	if(bg==bg_rd && ba==ba_rd)begin
 		delay3=tCCD_l;
 	end
-	$display("%d %d",delay1,bsr_array[(4*bg_rd)+ba_rd][READ]);
 
-//	$display("[dhruva][delay1=%d delay2=%d] bsr_array[previous_AcTiVaTE] is %d", delay1,delay2,bsr_array[(4*bg_a)+ba_a][ACTIVATE]);
 	if(bsr_array[(4*bg_a)+ba_a][ACTIVATE]>delay1 && bsr_array[4*(bg_wr)+ba_wr][WRITE]>delay2 && bsr_array[(4*bg_rd)+ba_rd][READ])begin
 		bsr_array[bank_number][READ]=0;
-		$display("Read Issued");
 		return(1);
 	end
 	else return 0;
@@ -543,14 +521,9 @@ if(next_state=="write")begin
 end
 
 if(next_state=="done")begin
-//	$display("[dhruva] - Done1 Issued\n\n\n");
-//	if(min_read<min_write)begin
   	if(rd_wr==0 || rd_wr==2) begin
 		delay1=tCL+tBURST;
-	//	$display("[dhruva]- Done2 issued");
-	//	$display("%d %d",delay1,bsr_array[(4*bg_rd)+ba_rd][READ]);
 		if(bsr_array[(4*bg_rd)+ba_rd][READ]>delay1)begin
-			$display("[dhruva]- Done3 issued at %0d",out_time);
 			return(1);
 		end
 		else return 0;

@@ -28,6 +28,10 @@ simulate :
 	$(VSIM) $(VSIM_FLAGS) +define+INPUT_FILE=$$INPUT_FILE +define+OUTPUT_FILE=$$OUTPUT_FILE $(TOP_MOD)
 debug :
 	$(VLOG) $(VLOG_FLAGS) $(SRC)+define+DEBUG
+run : compile
+
+	$(VSIM) $(VSIM_FLAGS) +define+INPUT_FILE=$$INPUT_FILE +define+OUTPUT_FILE=$$OUTPUT_FILE $(TOP_MOD) -do "run -all"
+
 
 
 

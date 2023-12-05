@@ -26,8 +26,11 @@ simulate :
 	read -p "Enter OUTPUT_FILE (default: dram.txt): " OUTPUT_FILE; \
 	OUTPUT_FILE=$${OUTPUT_FILE:-dram.txt}; \
 	$(VSIM) $(VSIM_FLAGS) +define+INPUT_FILE=$$INPUT_FILE +define+OUTPUT_FILE=$$OUTPUT_FILE $(TOP_MOD)
-debug :
+bugs :
 	$(VLOG) $(VLOG_FLAGS) $(SRC)+define+DEBUG
+
+debug : bugs simulate -do "run -all"
+
 run : compile
 
 	$(VSIM) $(VSIM_FLAGS) +define+INPUT_FILE=$$INPUT_FILE +define+OUTPUT_FILE=$$OUTPUT_FILE $(TOP_MOD) -do "run -all"

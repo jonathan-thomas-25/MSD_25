@@ -46,7 +46,7 @@ def process_input_file(input_file_path, output_file_path):
             output_file.write(trace_data)
 
 def main():
-    input_file_path = r"C:\\Users\\dhruv\\newpy\\input.txt.txt"  
+    input_file_path = r"C:\\Users\\dhruv\\newpy\\input.txt"  
     output_file_path = r"C:\\Users\\dhruv\\newpy\\output.txt" 
     
     process_input_file(input_file_path, output_file_path)

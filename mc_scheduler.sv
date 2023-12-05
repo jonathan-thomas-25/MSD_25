@@ -113,12 +113,12 @@ initial begin
    cpu_clock_count=0;
    dimm_clock_count=0;
    next_state=INITIAL;
-   if ($value$plusargs("INPUT_FILE=%s", filename)) begin
+   if ($value$plusargs("INPUT_FILE%s", filename)) begin
       $display("The filename is %s", filename);
    end
    else filename = "trace.txt";
 
-   if ($value$plusargs("OUTPUT_FILE=%s", filename1)) begin
+   if ($value$plusargs("OUTPUT_FILE%s", filename1)) begin
         $display("The filename is %s", filename1);
    end
    else filename1 = "dram.txt";
@@ -210,6 +210,10 @@ initial begin
 						if(time_elapsed)begin        	
 							$fwrite(fh1,"%0d   ACT0 %d %d %h\n",out_time-2,end_data.bg,end_data.ba,end_data.row);
 							$fwrite(fh1,"%0d   ACT1 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.row);
+							if(debug_check==1'b1)begin
+							$display("%0d   ACT0 %d %d %h\n",out_time-2,end_data.bg,end_data.ba,end_data.row);
+							$display("%0d   ACT1 %d %d %h\n",out_time,end_data.bg,end_data.ba,end_data.row);	
+							end
 							next_state=ACT1;
 						end
 			

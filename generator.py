@@ -36,7 +36,7 @@ def generate_trace_file(time, operation, bankgroup, bank, row):
         trace_file.write(trace_data)
 
 z = int(input("Enter number of entries: "))
-y = int(input("To clear previous traces, enter 1: "))
+y = int(input("To clear previous traces[enter 1] & To add to previous traces [enter 0]: "))
 
     # To clear inputs
 if(y==1):

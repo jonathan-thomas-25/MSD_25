@@ -20,9 +20,15 @@ compile :
 	$(VLOG) $(VLOG_FLAGS ) $(SRC) 
 
 simulate :  
-	$(VSIM) $(VSIM_FLAGS) $(TOP_MOD)
-run : compile simulate
+
+	@read -p "Enter INPUT_FILE (default: trace.txt): " INPUT_FILE; \
+	INPUT_FILE=$${INPUT_FILE:-trace.txt}; \
+	read -p "Enter OUTPUT_FILE (default: dram.txt): " OUTPUT_FILE; \
+	OUTPUT_FILE=$${OUTPUT_FILE:-dram.txt}; \
+	$(VSIM) $(VSIM_FLAGS) +define+INPUT_FILE=$$INPUT_FILE +define+OUTPUT_FILE=$$OUTPUT_FILE $(TOP_MOD)
+debug :
+	$(VLOG) $(VLOG_FLAGS) $(SRC)+define+DEBUG
 
 
 
-.PHONY: all compile simulate
+.PHONY: all compile simulate debug

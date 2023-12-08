@@ -26,9 +26,6 @@ def generate_trace_file(time, operation, bankgroup, bank, row):
 
     hex_address = hex(int(''.join(map(str, address)), 2))[2:].zfill(9)
 
-    # file_path = r'D:\trace_file.txt'
-
-    # Format the data for the trace file
     trace_data = f"{time_con} {core} {operation_con} {hex_address}\n"
     return trace_data
 
@@ -39,8 +36,7 @@ def process_input_file(input_file_path, output_file_path):
     with open(output_file_path, 'w') as output_file:
         for line in lines:
             if not line.strip():
-                continue  # Skip empty lines
-            # Assuming each line contains space-separated values for time, operation, bankgroup, bank, and row
+                continue 
             time_input, op, bankgroup, bank, row = map(int, line.split())
             trace_data = generate_trace_file(time_input, op, bankgroup, bank, row)
             output_file.write(trace_data)
